@@ -5,6 +5,8 @@ import android.app.TimePickerDialog;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -97,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
     Button btnN;
     @BindView(R.id.btnM)
     Button btnM;
+    @BindView(R.id.btnSmaller)
+    Button btnSmaller;
+    @BindView(R.id.btnBigger)
+    Button btnBigger;
+    @BindView(R.id.btnDEL)
+    Button btnDEL;
     @BindView(R.id.tvData)
     TextView tvData;
     @BindView(R.id.btnUp)
@@ -113,8 +122,12 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Button> buttons = new ArrayList<>();
     private List<Button> controls = new ArrayList<>();
-    private String text = "";
-    private String dpad ="DPAD";
+    private String dpad = "DPAD_";
+    private String keycode = "KEYCODE_";
+    private String textDate = "";
+    private Button array[];
+    private int x = 0;
+    private int y = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,58 +177,50 @@ public class MainActivity extends AppCompatActivity {
         buttons.add(btnN);
         buttons.add(btnM);
 
-        controls.add( btnUp);
+        controls.add(btnUp);
         controls.add(btnDown);
         controls.add(btnLeft);
         controls.add(btnRight);
         controls.add(btnEnter);
-
+        array = new Button[]{btn1, btn2,btn3,btn4,btn5,btn6,btn7,btn8,btn9,btn0,
+                             btnQ,btnW,btnE,btnR,btnT,btnY,btnU,btnI,btnO,btnP,
+                             btnA,btnS,btnD,btnF,btnG,btnH,btnJ,btnK,btnL,btnSmaller,
+                             btnZ,btnX,btnC,btnV,btnB,btnN,btnM,btnBigger,btnDEL,null};
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        String[] key = KeyEvent.keyCodeToString(event.getKeyCode()).split("_", 3);
-
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             for (int i = 0; i < buttons.size(); i++) {
-                if (key[1].equals(buttons.get(i).getText().toString().trim())) {
+                if ((keycode + buttons.get(i).getText().toString()).equals(KeyEvent.keyCodeToString(event.getKeyCode()))){
+                    textDate = textDate + buttons.get(i).getText().toString();
                     buttons.get(i).setBackgroundColor(Color.BLUE);
-
+                    tvData.setText(textDate);
                 }
             }
-            for(int i = 0 ; i <controls.size() ; i ++){
-                if(key[1].equals(dpad)){
-                    if(key[2].equals(controls.get(i).getText().toString().trim())){
-                        controls.get(i).setBackgroundColor(Color.BLUE);
-
-                    }else if(key[2].equals("CENTER")){
-                        controls.get(controls.size()-1).setBackgroundColor(Color.BLUE);
-                    }
+            for (int i = 0 ; i <controls.size(); i ++){
+                if((keycode + dpad + controls.get(i).getText().toString()).equals(KeyEvent.keyCodeToString(event.getKeyCode()))
+                ||(keycode + dpad+"C"+ controls.get(i).getText().toString()).equals(KeyEvent.keyCodeToString(event.getKeyCode()))){
+                    controls.get(i).setBackgroundColor(Color.BLUE);
                 }
             }
 
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
-            for (int i = 0; i < buttons.size(); i++) {
-                if (key[1].equals(buttons.get(i).getText().toString().trim())) {
-                    buttons.get(i).setBackgroundResource(R.color.btnColor);
-                    text = text.concat(key[1]);
-                    tvData.setText(text.trim());
-                    return true;
 
-                }
-
-            }
-            for(int i = 0 ; i <controls.size(); i ++){
-                if(key[1].equals(dpad)){
-                    if(key[2].equals(controls.get(i).getText().toString().trim())){
-                        controls.get(i).setBackgroundResource(R.color.btnColor);
-                        return true;
-                    }else if(key[2].equals("CENTER")){
-                        controls.get(controls.size()-1).setBackgroundResource(R.color.btnColor);
-                        return true;
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    //Do something here
+                    for (int i = 0; i < buttons.size(); i++) {
+                        buttons.get(i).setBackgroundResource(R.color.btnColor);
                     }
-                }
-            }
+                    for (int i = 0 ; i <controls.size(); i ++){
+                        if((keycode + dpad + controls.get(i).getText().toString()).equals(KeyEvent.keyCodeToString(event.getKeyCode()))
+                                ||(keycode + dpad+"C"+ controls.get(i).getText().toString()).equals(KeyEvent.keyCodeToString(event.getKeyCode()))){
+                            controls.get(i).setBackgroundResource(R.color.btnColor);
+                        }
+                    }
+                }, 500);
+
+
 
         }
         return super.dispatchKeyEvent(event);
